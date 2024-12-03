@@ -19,14 +19,8 @@ function Filters() {
       <SelectContent>
         <SelectItem value="light">ALphabetically a-z</SelectItem>
         <SelectItem value="dark">ALphabetically z-a</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
-        <SelectItem value="system">High-low</SelectItem>
+       <SelectItem value="high">high-low</SelectItem>
+       <SelectItem value="low">low-high</SelectItem>
       </SelectContent>
     </Select>
   )
