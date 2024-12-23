@@ -40,8 +40,6 @@ export const config = {
                     if (loginType === 'verifyOtp') {
                         const result = await verifyOtp({ email, phone, userId, code: code as string, redirectType }, others as UserDeviceDetails)
 
-                        console.log(result)
-
                         if (!result.success || !result?.data) {
                             throw new Error(result?.error?.message ?? "Invalid login credentials")
                         }

@@ -114,7 +114,6 @@ export function CartProvider({children}:Props){
     }
 
     async function removeFromCart(id:string){
-        console.log(id)
         const res =  (await remove(id, {
             headers:{
                 Authorization: `Bearer ${session.data?.accessToken?.token}`

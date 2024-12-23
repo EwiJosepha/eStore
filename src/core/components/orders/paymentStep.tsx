@@ -64,7 +64,6 @@ export const PaymentStep: React.FC = () => {
             variant: "default",
           })
           }
-        console.log(data, 'order creation response')
         
       },
   })
@@ -88,7 +87,6 @@ export const PaymentStep: React.FC = () => {
     } catch (err) {
       console.log(err, 'order creation error')
     }
-    console.log('Order confirmed:', { ...orderData, paymentMethod })
   }
 
   return (

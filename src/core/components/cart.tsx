@@ -35,8 +35,6 @@ export function CartItem({ item, product, onRemove, onUpdateQuantity }: CartItem
     image && setProductImage(`${envConf.apiBaseUrl}/users-service/files?url=${image}`)
   },[image])
 
-  console.log(item)
-
   return (
     <Card className="mb-4">
       <CardContent className="flex items-center p-4">
