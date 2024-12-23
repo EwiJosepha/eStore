@@ -9,6 +9,9 @@ import { getOrderById } from '@/app/actions/orders'
 import { useSession } from 'next-auth/react'
 import moment from 'moment'
 import { OrderStatus } from '@/types/orders'
+import { Skeleton } from "@/components/ui/skeleton"
+import ErrorAlert from '@/core/components/error-alert'
+import NoResult from '@/core/components/no-results'
 
 export function TrackOrderDetails() {
   const {id} = useParams<Record<string, string>>()
@@ -18,7 +21,7 @@ export function TrackOrderDetails() {
     queryKey: ['order', id],
     queryFn: async () => getOrderById(id, {
       headers: {
-        Authorization:  `Bearer ${session.data?.accessToken?.token}`
+        Authorization: `Bearer ${session.data?.accessToken?.token}`
       }
     }),
     enabled: !!id && !!session.data?.accessToken?.token
@@ -26,11 +29,71 @@ export function TrackOrderDetails() {
 
   const order = data?.data
 
-  if (isLoading || isFetching) return <div>Fix this: Loading...</div>
+  if (isLoading || isFetching) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-6 w-32 bg-gray-200 dark:bg-gray-800" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i+1}>
+                  <Skeleton className="h-4 w-24 mb-2 bg-gray-200 dark:bg-gray-800" />
+                  <Skeleton className="h-4 w-32 bg-gray-200 dark:bg-gray-800" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-  if (isError || !data?.success) return <div>Fix this: {error?.message ?? data?.error?.message}</div>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-6 w-32 bg-gray-200 dark:bg-gray-800" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i+1} className="h-4 w-24 bg-gray-200 dark:bg-gray-800" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-  if (!order) return <div>404 (Not found)... Fix this</div>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-6 w-32 bg-gray-200 dark:bg-gray-800" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i+1} className="grid grid-cols-4 gap-4">
+                  {Array.from({ length: 4 }).map((_, j) => (
+                    <Skeleton key={j+1} className="h-4 bg-gray-200 dark:bg-gray-800" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (isError || error) {
+    return <ErrorAlert error={error} message={ 'Failed to load order details. Please try again later.'}/>
+  }
+
+  if (!order) {
+    return <NoResult title='Order Not Found' message="We couldn't find the order you're looking for."/>
+  }
 
   const orderStatuses = Object.values(OrderStatus).filter(stat => stat !== OrderStatus.CANCELLED) as string[]
   const currentStatusIndex = orderStatuses.indexOf(order.status)
@@ -70,7 +133,7 @@ export function TrackOrderDetails() {
         <CardContent>
           <Steps currentStep={currentStatusIndex + 1}>
             {orderStatuses.map((status, index) => (
-              <Step key={index} title={status} />
+              <Step key={status+index} title={status} />
             ))}
           </Steps>
         </CardContent>

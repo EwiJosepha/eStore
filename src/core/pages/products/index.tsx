@@ -1,39 +1,57 @@
 'use client'
-
 import { getProducts } from '@/app/actions/products'
 import { Input } from '@/components/ui/input'
-import {ProductCard} from '@/core/components/product-card'
 import { productStatusKeys } from '@/types'
 import { useQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import ProductsGrid from './products-grid'
+import ProductCardSkeleton from '@/core/components/product-card-skeleton'
+import ErrorAlert from '@/core/components/error-alert'
+import NoResult from '@/core/components/no-results'
 
 export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('name')
 
-    const {data, error, isLoading, isFetching, isError} = useQuery({
+  const { data, error, isLoading, isFetching, isError } = useQuery({
     queryKey: ['products'],
-    queryFn: ()=>getProducts({params:{
+    queryFn: () => getProducts({
+      params: {
         filter: {
-            status: productStatusKeys.ACTIVE
+          status: productStatusKeys.ACTIVE
         },
         options: {
-            limit: 10,
-            page: 1,
-            withBrand: true,
-            withCategories: true,
-            withDiscounts: true
+          limit: 10,
+          page: 1,
+          withBrand: true,
+          withCategories: true,
+          withDiscounts: true
         }
-    }}),
+      }
+    }),
   })
 
-  if (isLoading || isFetching) return <div>Fix this: Loading...</div>
+  if (isLoading || isFetching) {
+    return (
+      <div className="grid sm:p-3  2xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductCardSkeleton key={`skeleton-${i + 1}`} />
+        ))}
+      </div>
+    )
+  }
 
-  if (isError || !data?.success) return <div>Fix this: {error?.message}</div>
+  if (error || isError) {
+    return <ErrorAlert />
+  }
 
   const products = data?.data?.data ?? []
+
+  if (!products?.length) {
+    return <NoResult title='No Products Found' message="We couldn't find any products matching your criteria." />
+  }
+
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -4,15 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '@/app/actions/products';
 import { productStatusKeys } from '@/types';
 import ProductsGrid from '../../products/products-grid';
-import { AlertCircle, PackageSearch } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ProductCardSkeleton from '@/core/components/product-card-skeleton';
 import LoadMore from '../load-more';
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import ErrorAlert from '@/core/components/error-alert';
+import NoResult from '@/core/components/no-results';
 
 const MostPopular: React.FC = () => {
-  const router=useRouter()
   const { data, error, isLoading, isFetching, isError } = useQuery({
     queryKey: ['products'],
     queryFn: () => getProducts({
@@ -43,55 +40,14 @@ const MostPopular: React.FC = () => {
   }
 
   if (error || isError) {
-    return (
-      <React.Fragment>
-        <Alert variant="destructive" className="mx-auto max-w-2xl">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error.message || 'Failed to load products. Please try again later.'}
-          </AlertDescription>
-        </Alert>
-        <div className='flex items-center justify-center my-2'>
-          <Button
-            onClick={() => router.refresh()}
-            aria-label="Refresh"
-          >
-            Try Again
-          </Button>
-        </div>
-      </React.Fragment>
-    )
+    return <ErrorAlert error={error} message="We couldn't find any products matching your criteria." />
   }
 
   const products = data?.data?.data ?? []
 
   if (!products?.length) {
-    return (
-      <React.Fragment>
-        <div className="text-center py-12">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-              <PackageSearch className="h-6 w-6 text-muted-foreground" />
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold">No Products Found</h3>
-          <p className="text-muted-foreground mt-2">
-            We couldn't find any products matching your criteria.
-          </p>
-        </div>
-        <div className='flex items-center justify-center my-2'>
-          <Button
-            onClick={() => router.refresh()}
-            aria-label="Refresh"
-          >
-            Try Again
-          </Button>
-        </div>
-      </React.Fragment>
-    )
+    return <NoResult title={"No Products Found"} message="We couldn't find any products matching your criteria." />
   }
-
   return (
     <React.Fragment>
       <ProductsGrid products={products} />
