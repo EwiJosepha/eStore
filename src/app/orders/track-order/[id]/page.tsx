@@ -5,7 +5,11 @@ import { dehydrateQuery } from "@/lib/dehydrateQuery";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 
-export default async function TrackOrderPage({ params }: { params: { id: string } }) {
+interface TrackOrderPageProps {
+  readonly params: { id: string }
+}
+
+export default async function TrackOrderPage({ params }: TrackOrderPageProps) {
   const session = await auth()
 
   const dehydratedState = await dehydrateQuery({
