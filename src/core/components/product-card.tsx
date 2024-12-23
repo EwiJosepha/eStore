@@ -12,7 +12,7 @@ import { AxiosError } from 'axios'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 interface ProductCardProps {
-  product: Product
+  readonly product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -61,8 +61,6 @@ export function ProductCard({ product }: ProductCardProps) {
               width={0}
               height={0}
               sizes='100vh'
-              // layout="fill"
-              // objectFit="cover"
               className="w-full h-full transition-transform duration-300 ease-in-out hover:scale-105 object-cover"
             />
           </div>
@@ -76,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-gray-500 mb-2">{product?.brand?.name}</p>
           <div className="flex items-center mb-2">
             <div className="flex mr-1">
-              {renderStars(product.averageRating || 0)}
+              {renderStars(product.averageRating?? 0)}
             </div>
             <span className="text-sm text-gray-500">({product.reviewCount})</span>
           </div>
