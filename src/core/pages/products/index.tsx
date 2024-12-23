@@ -2,34 +2,62 @@
 import { getProducts } from '@/app/actions/products'
 import { Input } from '@/components/ui/input'
 import { productStatusKeys } from '@/types'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import React, { useState } from 'react'
 import ProductsGrid from './products-grid'
+import { Product } from '@/types/products'
+import { Button } from '@/components/ui/button'
 import ProductCardSkeleton from '@/core/components/product-card-skeleton'
-import ErrorAlert from '@/core/components/error-alert'
 import NoResult from '@/core/components/no-results'
+import ErrorAlert from '@/core/components/error-alert'
 
 export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('name')
 
-  const { data, error, isLoading, isFetching, isError } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => getProducts({
-      params: {
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+    isLoading,
+    isFetching,
+    error,
+    isError
+  } = useInfiniteQuery({
+    queryKey: ['products', currentPage],
+    queryFn: ({pageParam = 1})=>getProducts({params:{
         filter: {
           status: productStatusKeys.ACTIVE
         },
         options: {
-          limit: 10,
-          page: 1,
-          withBrand: true,
-          withCategories: true,
-          withDiscounts: true
+            limit: 10,
+            page: pageParam,
+            withBrand: true,
+            withCategories: true,
+            withDiscounts: true
         }
+    }}),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.data?.limit || !lastPage?.data?.total || !lastPage?.data?.page) {
+        return undefined
       }
-    }),
+
+      const { page, limit, total } = lastPage?.data
+      const totalPages = Math.ceil(total / limit)
+      return page < totalPages ? page + 1 : undefined
+    },
+    // initialData:{
+    //   pages: [],
+    //   pageParams: []
+    // },
+    initialPageParam:{},
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+    placeholderData:(prev)=>prev
   })
 
   if (isLoading || isFetching) {
@@ -43,10 +71,20 @@ export default function ProductsPage() {
   }
 
   if (error || isError) {
-    return <ErrorAlert />
+    return <ErrorAlert error={error} message="We couldn't find any products matching your criteria." />
   }
 
-  const products = data?.data?.data ?? []
+  const products = data?.pages?.flatMap(item => item?.data?.data).filter((pdt):pdt is Product => pdt != undefined) ?? []
+
+  const handleLoadMore = async()=>{
+    try {
+      if (hasNextPage) {
+        await fetchNextPage()
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   if (!products?.length) {
     return <NoResult title='No Products Found' message="We couldn't find any products matching your criteria." />
@@ -76,6 +114,17 @@ export default function ProductsPage() {
         </Select> */}
       </div>
       <ProductsGrid products={products} />
+
+      {
+        hasNextPage && (
+          <div className=' flex items-center py-10 justify-center'>
+            <Button size={'lg'} className='cursor-pointer' onClick={handleLoadMore} disabled={isFetchingNextPage}>
+              Load More
+            </Button>
+          </div>
+        )
+      }
+
       {/* <Pagination>
         <PaginationContent>
           <PaginationItem>
