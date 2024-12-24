@@ -12,13 +12,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash, X } from 'lucide-react'
 interface CartItemProps {
-  item: Cart
-  product?: Product
+ readonly item: Cart
+ readonly product?: Product
   // price: number
   // quantity: number
   // image: string
-  onRemove: (id: string) => void
-  onUpdateQuantity: (id: string, newQuantity: number) => void
+ readonly onRemove: (id: string) => void
+ readonly onUpdateQuantity: (id: string, newQuantity: number) => void
 }
 
 export function CartItem({ item, product, onRemove, onUpdateQuantity }: CartItemProps) {

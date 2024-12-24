@@ -1,5 +1,4 @@
 'use client'
-
 import { getProducts } from '@/app/actions/products'
 import { Input } from '@/components/ui/input'
 import { productStatusKeys } from '@/types'
@@ -8,6 +7,9 @@ import React, { useState } from 'react'
 import ProductsGrid from './products-grid'
 import { Product } from '@/types/products'
 import { Button } from '@/components/ui/button'
+import ProductCardSkeleton from '@/core/components/product-card-skeleton'
+import NoResult from '@/core/components/no-results'
+import ErrorAlert from '@/core/components/error-alert'
 
 export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -28,7 +30,7 @@ export default function ProductsPage() {
     queryKey: ['products', currentPage],
     queryFn: ({pageParam = 1})=>getProducts({params:{
         filter: {
-            status: productStatusKeys.ACTIVE
+          status: productStatusKeys.ACTIVE
         },
         options: {
             limit: 10,
@@ -58,9 +60,19 @@ export default function ProductsPage() {
     placeholderData:(prev)=>prev
   })
 
-  if (isLoading || isFetching) return <div>Fix this: Loading...</div>
+  if (isLoading || isFetching) {
+    return (
+      <div className="grid sm:p-3  2xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ProductCardSkeleton key={`skeleton-${i + 1}`} />
+        ))}
+      </div>
+    )
+  }
 
-  if (isError) return <div>Fix this: {error?.message}</div>
+  if (error || isError) {
+    return <ErrorAlert error={error} message="We couldn't find any products matching your criteria." />
+  }
 
   const products = data?.pages?.flatMap(item => item?.data?.data).filter((pdt):pdt is Product => pdt != undefined) ?? []
 
@@ -73,6 +85,11 @@ export default function ProductsPage() {
       console.log(error)
     }
   }
+
+  if (!products?.length) {
+    return <NoResult title='No Products Found' message="We couldn't find any products matching your criteria." />
+  }
+
 
   return (
     <div className="container mx-auto px-4 py-8">

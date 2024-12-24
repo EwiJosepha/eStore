@@ -34,7 +34,7 @@ export default () => {
       </div>
       <div className="mt-8 lg:py-3 border-t items-center justify-between sm:flex">
         <div className="mt-4 sm:mt-0 text-gray-600 lg:text-2xl text-lg">
-          &copy; 2022 - PRESTIGE ATTIRE.
+          &copy; {new Date(Date.now()).getFullYear()} - PRESTIGE ATTIRE.
         </div>
       </div>
     </footer>
