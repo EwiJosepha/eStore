@@ -39,8 +39,8 @@ const MostPopular: React.FC = () => {
     )
   }
 
-  if (error || isError) {
-    return <ErrorAlert error={error} message="We couldn't find any products matching your criteria." />
+  if (error || isError || !data?.success) {
+    return <ErrorAlert error={error || data?.error} message="An Error Occurred. Please try again later" />
   }
 
   const products = data?.data?.data ?? []
