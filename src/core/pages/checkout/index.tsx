@@ -6,16 +6,17 @@ import { CheckoutProvider } from '@/core/providers/checkoutProviver'
 import { PersonalInfoStep } from '@/core/components/orders/personalInfoStep'
 import { PaymentStep } from '@/core/components/orders/paymentStep'
 import { OrderSummary } from '@/core/components/orders/orderSummary'
+import { Product } from '@/types/products'
 
-export const Checkout: React.FC = () => {
+export const Checkout: React.FC<{product?: Product|null}> = ({product=null}) => {
   const [step, setStep] = React.useState<'personal-info' | 'payment'>('personal-info')
 
   return (
-    <CheckoutProvider>
-      <div className="container mx-auto p-4 max-w-4xl">
+    <CheckoutProvider product={product}>
+      <div className="container mx-auto p-4 xl:max-w-6xl">
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="md:basis-1/2 lg:basis-2/3">
             <Tabs defaultValue={step} value={step} className="w-full" onValueChange={(value)=>setStep(value as 'personal-info' | 'payment')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="personal-info">Personal Info</TabsTrigger>
@@ -29,7 +30,7 @@ export const Checkout: React.FC = () => {
               </TabsContent>
             </Tabs>
           </div>
-          <div>
+          <div className='md:basis-1/2 lg:basis-1/3'>
             <OrderSummary />
           </div>
         </div>
