@@ -14,7 +14,6 @@ import ErrorAlert from '@/core/components/error-alert'
 export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState('name')
 
   const {
     data,

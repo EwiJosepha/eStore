@@ -1,12 +1,12 @@
 'use client'
 
 import React, { createContext, useContext, useState } from 'react'
-import { CreateOrderDTO, ShippingAddress, OrderItem, OrderStatus } from '@/types/orders'
+import { CreateOrderDTO, ShippingAddress, OrderStatus } from '@/types/orders'
 import { useSession } from 'next-auth/react'
 import { useCart } from './cartProvider'
-// import { useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getProducts } from '@/app/actions/products'
+import { Product } from '@/types/products'
 
 type CheckoutContextType = {
   orderData: CreateOrderDTO
@@ -18,13 +18,10 @@ type CheckoutContextType = {
 
 const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined)
 
-export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CheckoutProvider: React.FC<{ children: React.ReactNode, product?: Product|null }> = ({ children, product = null }) => {
   const [isguest, setIsguest] = useState<boolean>(false)
   const {status, data} = useSession()
   const {cart} = useCart()
-  // const searchParams = useSearchParams()
-
-  // const productId = searchParams.get('product')
 
   const filter = {
     id: cart?.map(item => item?.productId)??[]
@@ -47,13 +44,23 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     email: data?.user?.email ?? '',
     name: data?.user?.name ?? '',
     phone: data?.user?.phone ?? '',
-    paymentId: 'cod',
-    // couponCode: '',
+    paymentId: 'fiat',
     currency: 'AED',
     shippingAddress: {} as ShippingAddress,
     discount: 0,
     // paymentMethod: '',
-    orderItems: [...(productData?.data?.data??[]).map(pdt =>{
+    orderItems: product ? [...(productData?.data?.data??[]).concat([product]).map(pdt =>{
+      const found = cart?.find(item => item?.productId === pdt.id)
+      return {
+        productId: pdt.id,
+        productName: pdt?.name,
+        productSKU: pdt?.slug,
+        quantity: found?.quantity || 1,
+        price: pdt?.originalPrice,
+        total: (found?.quantity||1) * pdt?.originalPrice,
+        tax: 0
+      }
+    })] : [...(productData?.data?.data??[]).map(pdt =>{
       const found = cart?.find(item => item?.productId === pdt.id)
       return {
         productId: pdt.id,
@@ -65,7 +72,7 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         tax: 0
       }
     })],
-    totalAmount: [...(productData?.data?.data??[]).map(pdt =>{
+    totalAmount: (product ? [...(productData?.data?.data??[]).concat([product]).map(pdt =>{
       const found = cart?.find(item => item?.productId === pdt.id)
       return {
         productId: pdt.id,
@@ -76,7 +83,18 @@ export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         total: (found?.quantity||1) * pdt?.originalPrice,
         tax: 0
       }
-    })].reduce((a, b)=> a + b.total, 0),
+    })].reduce((a, b)=> a + b.total, 0) : [...(productData?.data?.data??[]).map(pdt =>{
+      const found = cart?.find(item => item?.productId === pdt.id)
+      return {
+        productId: pdt.id,
+        productName: pdt?.name,
+        productSKU: pdt?.slug,
+        quantity: found?.quantity || 1,
+        price: pdt?.originalPrice,
+        total: (found?.quantity||1) * pdt?.originalPrice,
+        tax: 0
+      }
+    })].reduce((a, b)=> a + b.total, 0)),
     userId: data?.user?.id ?? '',
     status: OrderStatus.PENDING,
   })

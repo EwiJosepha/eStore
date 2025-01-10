@@ -29,13 +29,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const {addToCart} = useCart()
 
-  const onBuyNow = (productId: string)=>{}
-
   const renderStars = (rating: number) => {
     return Array(5).fill(0).map((_, i) => (
       <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
     ))
   }
+  
   const discountedPrice = product?.originalPrice - (product?.discounts?.map(item => item?.discountType === DiscountType.FIXED_AMOUNT ? +item?.discountValue : +product?.originalPrice * (+item?.discountValue / 100)).reduce((a, b)=> a+b,0)??0)
 
   const productImage = product.media?.find(item => item?.type === FileType.IMAGE)?.url
@@ -100,11 +99,10 @@ export function ProductCard({ product }: ProductCardProps) {
             <ShoppingCart className="mr-2 h-4 w-4" /> <span className='hidden xs:inline text-xs md:text-sm lg:text-lg'>Add to Cart</span>
           </Button>
           <Button 
-            className="w-full" 
-            onClick={() => onBuyNow(product.id)}
-            disabled={product.qtyInStock === 0}
+            className="w-full"
+            disabled={product.qtyInStock <= 0}
           >
-            <Link href={`/checkout?product=${product?.id}`} className='w-full flex items-center'>
+            <Link href={`/checkout?product=${product?.slug}`} className='w-full flex items-center'>
               <CreditCard className="mr-2 h-4 w-4" /> <span className='hidden xs:inline text-xs md:text-sm lg:text-lg'>Buy Now</span>
             </Link>
           </Button>
