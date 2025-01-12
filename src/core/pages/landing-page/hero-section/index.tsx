@@ -1,55 +1,50 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-
-const data = [
-  {
-    id: 1,
-    image: '/placeholder.svg?height=400&width=1200',
-    alt: 'Summer Collection',
-    title: 'Summer Collection',
-    subtitle: 'Discover our latest arrivals',
-    cta: 'Shop Now',
-    link: '/summer-collection',
-  },
-  {
-    id: 2,
-    image: '/placeholder.svg?height=400&width=1200',
-    alt: 'Special Offer',
-    title: 'Special Offer',
-    subtitle: 'Get 30% off on selected items',
-    cta: 'View Offers',
-    link: '/special-offers',
-  },
-  {
-    id: 3,
-    image: '/placeholder.svg?height=400&width=1200',
-    alt: 'New Arrivals',
-    title: 'New Arrivals',
-    subtitle: 'Check out our latest products',
-    cta: 'Explore',
-    link: '/new-arrivals',
-  },
-]
+import { useQuery } from '@tanstack/react-query'
+import { getBanners } from '@/app/actions/banners'
+import { FileType } from '@/types'
+import Link from 'next/link'
+import { ImageWithFallback } from '@/components/ui/image'
 
 interface Banner {
-  id: number
-  image: string
-  alt: string
-  title: string
-  subtitle: string
-  cta: string
-  link: string
+  appLink: string | null
+  createdAt: string
+  createdBy: string
+  deletedAt: string | null
+  fileType: FileType.IMAGE | FileType.VIDEO
+  id: string
+  imageUrl: string
+  isActive: boolean
+  isDeleted: boolean
+  lastModifiedBy: string | null
+  lastUpdatedAt: string
+  query: object
+  webLink: string
+  title?: string
+  subtitle?: string
 }
 
 export default function HeroSection() {
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['banners'],
+    queryFn: () => getBanners({
+      params: {
+        options: {
+          limit: 5,
+          page: 1,
+        }
+      }
+    }),
+  })
+
   const [currentSlide, setCurrentSlide] = useState(0)
   const [banners, setBanners] = useState<Banner[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % banners.length)
@@ -60,23 +55,13 @@ export default function HeroSection() {
   }
 
   useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        setIsLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setBanners(data)
-      } catch (error) {
-        alert("err")
-        console.error('Error fetching banners:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchBanners()
-  }, [])
+    if (!data?.data?.data.length) return
+    if (data.data.data.length > 0)
+      setBanners(data.data.data)
+  }, [data?.data?.data?.length])
 
   useEffect(() => {
+    if (!banners.length) return
     if (banners.length > 0) {
       const timer = setInterval(nextSlide, 5000)
       return () => clearInterval(timer)
@@ -96,17 +81,17 @@ export default function HeroSection() {
         {banners.map((banner) => (
           <div key={banner.id} className="w-full flex-shrink-0">
             <div className="relative h-[400px]">
-              <Image
-                src={banner.image}
-                alt={banner.alt}
+              <ImageWithFallback
+                src={banner.imageUrl}
+                alt={banner.imageUrl}
                 fill
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white">
-                <h2 className="text-4xl font-bold mb-2">{banner.title}</h2>
-                <p className="text-xl mb-4">{banner.subtitle}</p>
+                <h2 className="text-4xl font-bold mb-2">{banner.title ?? "Add Banner Title"}</h2>
+                <p className="text-xl mb-4">{banner.subtitle ?? "add banner subtitle"}</p>
                 <Button asChild>
-                  <a href={banner.link}>{banner.cta}</a>
+                  <Link href={banner.webLink}>Add Banner Action <ArrowRight /></Link>
                 </Button>
               </div>
             </div>
