@@ -22,32 +22,32 @@ export const OrderSummary: React.FC = () => {
           {orderData.orderItems?.map((item, index) => (
             <div key={index} className="flex justify-between items-center mb-2">
               <div>
-                <p className="font-medium">{item.productName}</p>
+                <p className="font-medium capitalize">{item.productName}</p>
                 <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
               </div>
-              <p>${item.total.toFixed(2)}</p>
+              <p>{orderData?.currency || 'AED'}{item.total.toFixed(2)}</p>
             </div>
           ))}
         </ScrollArea>
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>{orderData?.currency || 'AED'}{subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>Tax</span>
-            <span>${tax.toFixed(2)}</span>
+            <span>{orderData?.currency || 'AED'}{tax?.toFixed(2)}</span>
           </div>
           
-          {orderData.discount && orderData.discount > 0 && (
+          {orderData.discount && orderData.discount > 0 ? (
             <div className="flex justify-between text-green-600">
               <span>Discount</span>
-              <span>-${orderData.discount.toFixed(2)}</span>
+              <span>-{orderData?.currency || 'AED'}{orderData.discount.toFixed(2)}</span>
             </div>
-          )}
+          ) : null}
           <div className="flex justify-between font-bold text-lg pt-2 border-t">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{orderData?.currency || 'AED'}{total.toFixed(2)}</span>
           </div>
         </div>
       </CardContent>
