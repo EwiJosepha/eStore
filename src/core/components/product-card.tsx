@@ -10,6 +10,7 @@ import envConf from '@/lib/env.conf'
 import { useCart } from '../providers/cartProvider'
 import { AxiosError } from 'axios'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { ImageWithFallback } from '@/components/ui/image'
 
 interface ProductCardProps {
   readonly product: Product
@@ -54,8 +55,8 @@ export function ProductCard({ product }: ProductCardProps) {
       <Card className="overflow-hidden flex flex-col">
         <Link href={`/all-products/${product.slug}`}>
           <div className="aspect-square relative overflow-hidden">
-            <Image
-              src={productImage ? `${envConf.apiBaseUrl}/users-service/files?url=${productImage}`: 'S/placeholder.svg?height=300&width=300'}
+            <ImageWithFallback
+              src={productImage!}
               alt={product.name}
               width={0}
               height={0}
